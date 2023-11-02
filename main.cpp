@@ -1,6 +1,8 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <vector>
+#include <algorithm>
 using namespace std;
 
 string elements[120] = {
@@ -124,31 +126,37 @@ string elements[120] = {
     "Uuo 294",
 };
 
-int findElement(string compare, int size) 
+int findElement(string c, int s) 
 {
+  string compare = c;
+  int size = s;
   string elementName = "";
-  cout << "Find element" << endl;
-  cout << "compare: " << compare << endl;
+  //cout << "Find element" << endl;
   for (int i=0; i<(sizeof(elements)/sizeof(elements[0])); i++)
   {
     elementName = elements[i].substr(0,size);
+    //cout << "elementName" << elementName << endl;
     if (elementName == compare)
     {
-      cout << "element name: " << elementName << endl;
+      //cout << "element name: " << elementName << endl;
       return i;
     }
   }
   return -1;
 }
 
-float getWeight (string compare, int size)
+float getWeight (string c, int s)
 {
+  string compare = c;
+  int size = s;
   string weight = "";
   float nWeight = 0;
+  //cout << "Compare:" << compare << "test" << endl;
   int index = findElement(compare, size);
+  //cout << "Index: " << index << endl;
   if (index != -1)
   {
-    cout << "Element found: " << index << endl;
+    cout << "Element found: " << index+1 << endl;
     weight = elements[index].substr(1);
     for (int i=weight.length()-1; i>=0; i--)
     {
@@ -169,6 +177,11 @@ float getWeight (string compare, int size)
   {
     cout << "Element not found" << endl;
   }
+}
+
+bool setClear()
+{
+  return false;
 }
 
 bool isLowercase(char let)
@@ -193,81 +206,17 @@ int main()
 {
   string formula = "";
   string compare = "";
-  char let, let2; 
+  char let; 
   float weight = 0;
   int index = 0;
-  float total = 0;
+  int choice = 0;
+  float elementTotal = 0;
+  float endTotal = 0;
+  vector<float> total;
   
-  cout << "Enter a chemical formula: ";
+  cout << "---Calculating the Molecular Weight of Compounds---" << endl << "1. Enter any compound" << endl << "2. You may use parentheses" << endl << "3. Case sensitive" << endl << "4. All numbers are computed as subscripts" << endl << "Ex: Cu3(PO4)2" << endl << "Enter a formula: ";
   cin >> formula;
 
-  /*for (int i=0; i<formula.length(); i++)
-  {
-    let = formula[i];
-    if (let >= 'A' && let <= 'Z')
-    {
-      cout << let << "Letter is capital" << endl;
-      compare += formula[i];
-
-      let2 = formula[i+1];
-      if (let2 >= 'a' && let2 <= 'z')
-      {
-        cout << let2 << " Letter is lowercase" << endl;
-        if (compare.length()>=1)
-        {
-          compare += formula[i+1];
-          weight = getWeight(elementName, compare);
-          
-          if (let2 >= '0' && let2 <= '9')
-          {
-            cout << "Number found" << endl;
-            let2 = stoi(string(1, let2));
-            total += weight * let2;
-          }
-          else
-          {
-            total += weight;
-          }
-              
-          compare = "";
-        }
-        else
-        {
-          weight = getWeight(elementName, compare);
-
-          let2 = formula[i+1];
-          cout << "newletter: " << let2 << endl;
-          if (let2 >= '0' && let2 <= '9')
-          {
-            cout << "Number found" << endl;
-            let2 = stoi(string(1, let2));
-            total += weight * let2;
-          }
-          else
-          {
-            total += weight;
-          }
-
-          compare = "";
-        }
-      }
-      else
-      {
-        cout << "Letter is not lowercase" << endl;
-      }
-    }
-    else if (let >= '0' && let <= '9')
-    {
-      cout << let << " Letter is a number" << endl;
-    }
-    else
-    {
-      cout << let << "is an invalid character" << endl;
-    }
-  }
-  cout << "Total: " << total << endl; */
-
-  int choice = 0;
   for (int i=0; i<formula.length(); i++)
     {
       let = formula[i];
@@ -284,62 +233,105 @@ int main()
       {
         choice = 3;
       }
+      else if (let == '(')
+      {
+        choice = 4;
+      }
+      else if (let == ')')
+      {
+        choice = 5;
+      }
       else
       {
         choice = 0;
       }
       switch (choice) {
         case 1:
-          cout << "Upper case" << endl;
-          compare += formula[i];
-          cout << "Compare: " << compare << endl;
+          //cout << "Upper case" << endl;
+          //cout << "elementTotal: " << elementTotal << endl;
+          compare = formula[i];
           if (isLowercase(formula[i+1]))
           {
-            cout << "Next letter is lower case" << endl;
-            cout << "Compare: " << compare << endl;
+            //cout << "Next letter is lower case" << endl;
             break;
           }
           else if (isNumber(formula[i+1]))
           {
-            cout << "Next letter is a number" << endl;
+            //cout << "Next letter is a number" << endl;
+            //cout << "Compare: " << compare << endl;
+            //compare += formula[i];
+            weight = getWeight(compare, 1);
             break;
           }
           else 
           {
             weight = getWeight(compare, 1);
-            total += weight;
-            cout << "Total: " << total << endl;
-            compare = " ";
+            elementTotal = weight;
+            //cout << "elementTotal: " << elementTotal << endl;
+            total.push_back(elementTotal);
+            //cout << "Total: " << total << endl;
+            compare = "";
+            elementTotal = 0;
             break;
           }
           break;
         case 2:
-          cout << "Lower case" << endl;
+          //cout << "Lower case" << endl;
           compare += formula[i];
           weight = getWeight(compare, 2);
           if (isNumber(formula[i+1]))
           {
-            cout << "Next letter is a number" << endl;
-            cout << "Compare: " << compare << endl;
+            //cout << "Next letter is a number" << endl;
             break;
           }
           else
           {
-            total += weight;
-            cout << "Total: " << total << endl;
+            elementTotal = weight;
+            //cout << "elementTotal: " << elementTotal << endl;
+            total.push_back(elementTotal);
+            compare = "";
+            elementTotal = 0;
+            break;
+            //cout << "Total: " << total << endl;
           }
-          break;
         case 3:
-          cout << "Number" << endl;
-          let2 = stoi(string(1, formula[i]));
-          total += weight * let2;
-          cout << "Total: " << total << endl;
-          compare = " ";
+          //cout << "Number" << endl;
+          let = stoi(string(1, formula[i]));
+          elementTotal = weight * let;
+          //cout << "elementTotal: " << elementTotal << endl;
+          total.push_back(elementTotal);
+          //cout << "Total: " << total << endl;
+          elementTotal = 0;
+          endTotal = 0;
+          compare = "";
           break;
-        default:
-          cout << "Invalid character" << endl;
+        case 4:
+          //cout << "(" << endl;
+          total.push_back(0);
+          break;
+        case 5:
+          //cout << ")" << endl;
+          auto it = find(total.begin(), total.end(), 0);
+          index = distance(total.begin(), it);
+          for (int i=index; i<total.size(); i++)
+          {
+            endTotal += total[i];
+            //cout << "End total: " << endTotal << endl;
+          }
+          for (int i=index; i<total.size(); i++)
+          {
+            total.pop_back();
+            i--;
+          }
+          weight = endTotal;
+          break;
      }
     }
-    cout << "Total: " << total << endl;
+    for (int i=0; i<total.size(); i++)
+      {
+        cout << "Total " << i+1 << ": " << total[i] << endl;
+        endTotal += total[i];
+      }
+    cout << "Overall Total: " << endTotal << endl;
 
 }
