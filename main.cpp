@@ -5,6 +5,7 @@
 #include <algorithm>
 using namespace std;
 
+//initialize the elements and their molecular weight
 string elements[120] = {
     "H 1.008",
     "He 4.0026",
@@ -126,38 +127,36 @@ string elements[120] = {
     "Uuo 294",
 };
 
+//Search list of elements for "compare" element
 int findElement(string c, int s) 
 {
   string compare = c;
   int size = s;
   string elementName = "";
-  //cout << "Find element" << endl;
   for (int i=0; i<(sizeof(elements)/sizeof(elements[0])); i++)
   {
     elementName = elements[i].substr(0,size);
-    //cout << "elementName" << elementName << endl;
     if (elementName == compare)
     {
-      //cout << "element name: " << elementName << endl;
       return i;
     }
   }
   return -1;
 }
 
+//Find element's index and determine its weight
 float getWeight (string c, int s)
 {
   string compare = c;
   int size = s;
   string weight = "";
   float nWeight = 0;
-  //cout << "Compare:" << compare << "test" << endl;
   int index = findElement(compare, size);
-  //cout << "Index: " << index << endl;
   if (index != -1)
   {
     cout << "Element found: " << index+1 << endl;
     weight = elements[index].substr(1);
+    //Separate the element's name from its weight
     for (int i=weight.length()-1; i>=0; i--)
     {
       if (isdigit(weight[i]) || weight[i]=='.')
@@ -170,6 +169,7 @@ float getWeight (string c, int s)
         break;
       }
     }
+    //Parse element's weight string into float
     nWeight = stof(weight);
     return nWeight;
   }
@@ -179,11 +179,17 @@ float getWeight (string c, int s)
   }
 }
 
-bool setClear()
+//Determine if char is Uppercase
+bool isUppercase(char let)
 {
+  if (let >= 'A' && let <= 'Z')
+  {
+    return true;
+  }
   return false;
 }
 
+//Determine if char is Lowercase
 bool isLowercase(char let)
 {
   if (let >= 'a' && let <= 'z')
@@ -193,6 +199,7 @@ bool isLowercase(char let)
   return false;
 }
 
+//Determine if char is a Number
 bool isNumber(char let)
 {
   if (let >= '0' && let <= '9')
@@ -213,23 +220,25 @@ int main()
   float elementTotal = 0;
   float endTotal = 0;
   vector<float> total;
-  
+
+  //Print directions and get user input for formula
   cout << "---Calculating the Molecular Weight of Compounds---" << endl << "1. Enter any compound" << endl << "2. You may use parentheses" << endl << "3. Case sensitive" << endl << "4. All numbers are computed as subscripts" << endl << "Ex: Cu3(PO4)2" << endl << "Enter a formula: ";
   cin >> formula;
 
+  //Determine type of char for each char in the formula
   for (int i=0; i<formula.length(); i++)
     {
       let = formula[i];
-      if (let >= 'A' && let <= 'Z')
-        {
-          choice = 1;
-        }
+      if (isUppercase(let))
+      {
+        choice = 1;
+      }
 
-      else if (let >= 'a' && let <= 'z')
+      else if (isLowercase(let))
       {
         choice = 2;
       }
-      else if (let >= '0' && let <= '9')
+      else if (isNumber(let))
       {
         choice = 3;
       }
@@ -246,20 +255,18 @@ int main()
         choice = 0;
       }
       switch (choice) {
+        case 0:
+          //Error: char is not a number, letter, or parentheses
+          cout << "Invalid character" << endl;
         case 1:
-          //cout << "Upper case" << endl;
-          //cout << "elementTotal: " << elementTotal << endl;
+          //Calculations for Uppercase char "A-Z"
           compare = formula[i];
           if (isLowercase(formula[i+1]))
           {
-            //cout << "Next letter is lower case" << endl;
             break;
           }
           else if (isNumber(formula[i+1]))
           {
-            //cout << "Next letter is a number" << endl;
-            //cout << "Compare: " << compare << endl;
-            //compare += formula[i];
             weight = getWeight(compare, 1);
             break;
           }
@@ -267,56 +274,48 @@ int main()
           {
             weight = getWeight(compare, 1);
             elementTotal = weight;
-            //cout << "elementTotal: " << elementTotal << endl;
             total.push_back(elementTotal);
-            //cout << "Total: " << total << endl;
             compare = "";
             elementTotal = 0;
             break;
           }
           break;
         case 2:
-          //cout << "Lower case" << endl;
+          //Calculations for Lowercase char "a-z"
           compare += formula[i];
           weight = getWeight(compare, 2);
           if (isNumber(formula[i+1]))
           {
-            //cout << "Next letter is a number" << endl;
             break;
           }
           else
           {
             elementTotal = weight;
-            //cout << "elementTotal: " << elementTotal << endl;
             total.push_back(elementTotal);
             compare = "";
             elementTotal = 0;
             break;
-            //cout << "Total: " << total << endl;
           }
         case 3:
-          //cout << "Number" << endl;
+          //Calculations for Number char "0-9"
           let = stoi(string(1, formula[i]));
           elementTotal = weight * let;
-          //cout << "elementTotal: " << elementTotal << endl;
           total.push_back(elementTotal);
-          //cout << "Total: " << total << endl;
           elementTotal = 0;
           endTotal = 0;
           compare = "";
           break;
         case 4:
-          //cout << "(" << endl;
+          //Push a 0 to total vector for Open Parentheses char "("
           total.push_back(0);
           break;
         case 5:
-          //cout << ")" << endl;
+          //Calculations for Close Parentheses char ")"
           auto it = find(total.begin(), total.end(), 0);
           index = distance(total.begin(), it);
           for (int i=index; i<total.size(); i++)
           {
             endTotal += total[i];
-            //cout << "End total: " << endTotal << endl;
           }
           for (int i=index; i<total.size(); i++)
           {
@@ -327,11 +326,13 @@ int main()
           break;
      }
     }
+    //Print individual totals for elements or compounds in parentheses
     for (int i=0; i<total.size(); i++)
       {
         cout << "Total " << i+1 << ": " << total[i] << endl;
         endTotal += total[i];
       }
+    //Print total molecular weight
     cout << "Overall Total: " << endTotal << endl;
 
 }
